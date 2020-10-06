@@ -1,0 +1,54 @@
+from flask_wtf import Form
+from wtforms import StringField, PasswordField
+from wtforms.validators import (DataRequired, Regexp, ValidationError, Email, Length, EqualTo)
+
+from models import User
+
+
+def name_exists(field):  # checks to see if username exists already and will provide error message
+    if User.select().where(User.username == field.data).exists():
+        raise ValidationError('User with that name already exists.')
+
+
+def email_exists(field):  # checks to see if email exists already and will provide error message
+    if User.select().where(User.email == field.data).exists():
+        raise ValidationError('User with that email already exists.')
+
+
+class RegisterForm(Form):
+    username = StringField(
+        'Username',
+        validators=[
+            DataRequired(),
+            Regexp(
+                r'^[a-zA-Z0-9_]+$',  # creates range from a-z, A-Z, 0-9 and underscores to see
+                                     # if user name has correct characters (character check)
+                message=("Username should be one word, letters, "
+                         "numbers, and underscores only.")
+            ),
+            name_exists
+        ])
+    email = StringField(
+        'Email',
+        validators=[
+            DataRequired(),
+            Email(),
+            email_exists
+        ])
+    password = PasswordField(
+        'Password',
+        validators=[
+            DataRequired(),
+            Length(min=2),
+            EqualTo('password2', message='Passwords must match')
+            # double entry verification
+        ])
+    password2 = PasswordField(
+        'Confirm Password',
+        validators=[DataRequired()]
+    )
+    
+
+class LoginForm(Form):  # creates login form
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
