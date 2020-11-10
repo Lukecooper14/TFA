@@ -29,7 +29,7 @@ class User(UserMixin, Model):
                     is_admin=admin)
         except IntegrityError:  # checks for referential integrity
             raise ValueError("User already exists")
-            
+
 
 def initialize():  # creates and connects database to hold user information
     DATABASE.connect()

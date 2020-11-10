@@ -1,9 +1,10 @@
-from flask import (Flask, g, render_template, flash, redirect, url_for)
+from flask import (Flask, g, render_template, flash, redirect, url_for, request)
 from flask_bcrypt import check_password_hash
 from flask_login import (LoginManager, login_user, logout_user, login_required)
 
 import forms
 import models
+import shortcuts
 
 
 DEBUG = True  # to get more information on the symbol files - which will enable you
@@ -49,7 +50,7 @@ def register():
         models.User.create_user(
             username=form.username.data,
             email=form.email.data,
-            password=form.password.data
+            password=form.password.data,
         )
         return redirect(url_for('index'))
     return render_template('register.html', form=form)
@@ -81,6 +82,19 @@ def logout():
     return redirect(url_for('index'))
 
 
+@app.route('/stats', methods=['GET', 'POST'])
+def table():
+    data={}
+    if request.method == 'POST':
+        for i in request.form.getlist('mycheckbox'):
+            data[i] = 1
+    return render_template("table.html", headings=headings, data=data)
+
+
+headings = ("Stat Type", "Amount")
+data = ()
+
+
 @app.route('/')
 def index():
     return 'hey'
@@ -98,3 +112,7 @@ if __name__ == '__main__':
     except ValueError:
         pass
     app.run(debug=DEBUG, host=HOST, port=PORT)
+
+
+
+
